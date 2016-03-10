@@ -466,4 +466,30 @@ class Article < Content
     to = to - 1 # pull off 1 second so we don't overlap onto the next day
     return from..to
   end
+  
+  def merge!(merge_id)
+    otherArticle = article_to_merge_with(merge_id)
+    self.body = self.body + ' ' + otherArticle.body
+    merge_comments(merge_id)
+    otherArticle.destroy
+    self.save
+  end
+  
+  private
+
+    def merge_comments(merge_id)
+      comments = Comment.where(:article_id => merge_id)
+      comments.each do |comment|
+        comment.article_id = self.id
+        comment.article = self
+        comment.save
+      end
+    end
+
+    def article_to_merge_with(merge_id)
+      raise ArgumentError, 'Article cannot merge with itself!' if merge_id.to_i == self.id
+      otherArticle = Article.find(merge_id)
+      raise ArgumentError, 'No such ariticle exists for merging!' if otherArticle.nil?
+      otherArticle
+    end
 end
