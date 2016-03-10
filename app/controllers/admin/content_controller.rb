@@ -266,4 +266,5 @@ class Admin::ContentController < Admin::BaseController
     raise ArgumentError, 'No such Article ID exists for merging!' if article.nil?
     article
   end
+  
 end
